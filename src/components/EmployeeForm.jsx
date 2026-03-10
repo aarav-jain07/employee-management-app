@@ -8,12 +8,15 @@ const EMPTY_FORM = {
   position: '',
   salary: '',
   joinDate: '',
+  phone: '',
+  employmentType: 'Full-time',
+  status: 'Active',
 }
 
 function EmployeeForm({ mode, employee, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(
     mode === 'edit' && employee
-      ? { ...employee, salary: String(employee.salary) }
+      ? { ...employee, salary: String(employee.salary), phone: employee.phone || '', employmentType: employee.employmentType || 'Full-time', status: employee.status || 'Active' }
       : EMPTY_FORM
   )
   const [errors, setErrors] = useState({})
@@ -30,6 +33,9 @@ function EmployeeForm({ mode, employee, onSubmit, onCancel }) {
     if (!data.position.trim()) errs.position = 'Position is required.'
     if (data.salary !== '' && isNaN(Number(data.salary))) {
       errs.salary = 'Salary must be a number.'
+    }
+    if (data.phone && !/^\+?[\d\s\-().]{7,20}$/.test(data.phone)) {
+      errs.phone = 'Enter a valid phone number.'
     }
     return errs
   }
@@ -158,6 +164,51 @@ function EmployeeForm({ mode, employee, onSubmit, onCancel }) {
               onChange={handleChange}
             />
           </div>
+
+          <div className="form-group">
+            <label htmlFor="phone" className="form-label">Phone Number</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              className={`form-input${errors.phone ? ' input-error' : ''}`}
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="e.g. 555-123-4567"
+            />
+            {errors.phone && <span className="error-message">{errors.phone}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="employmentType" className="form-label">Employment Type</label>
+            <select
+              id="employmentType"
+              name="employmentType"
+              className="form-input"
+              value={formData.employmentType}
+              onChange={handleChange}
+            >
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Contract">Contract</option>
+              <option value="Intern">Intern</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="status" className="form-label">Status</label>
+            <select
+              id="status"
+              name="status"
+              className="form-input"
+              value={formData.status}
+              onChange={handleChange}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="On Leave">On Leave</option>
+            </select>
+          </div>
         </div>
 
         <div className="form-actions">
@@ -184,6 +235,9 @@ EmployeeForm.propTypes = {
     position: PropTypes.string,
     salary: PropTypes.number,
     joinDate: PropTypes.string,
+    phone: PropTypes.string,
+    employmentType: PropTypes.string,
+    status: PropTypes.string,
   }),
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,

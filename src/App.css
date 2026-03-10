@@ -434,3 +434,27 @@
   color: #718096;
   font-size: 1rem;
 }
+
+/* ── Status Badge ────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-inactive {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.status-on-leave {
+  background: #fef3c7;
+  color: #92400e;
+}

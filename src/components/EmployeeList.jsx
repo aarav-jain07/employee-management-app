@@ -43,8 +43,11 @@ function EmployeeList({ employees, loading, onAdd, onEdit, onDelete }) {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Phone</th>
                 <th>Department</th>
                 <th>Position</th>
+                <th>Employment Type</th>
+                <th>Status</th>
                 <th>Salary</th>
                 <th>Join Date</th>
                 <th>Actions</th>
@@ -59,10 +62,17 @@ function EmployeeList({ employees, loading, onAdd, onEdit, onDelete }) {
                   <td data-label="Email">
                     <a href={`mailto:${employee.email}`} className="email-link">{employee.email}</a>
                   </td>
+                  <td data-label="Phone">{employee.phone || '—'}</td>
                   <td data-label="Department">
                     <span className="department-badge">{employee.department}</span>
                   </td>
                   <td data-label="Position">{employee.position}</td>
+                  <td data-label="Employment Type">{employee.employmentType || '—'}</td>
+                  <td data-label="Status">
+                    <span className={`status-badge status-${(employee.status || 'active').toLowerCase().replace(' ', '-')}`}>
+                      {employee.status || '—'}
+                    </span>
+                  </td>
                   <td data-label="Salary">{formatSalary(employee.salary)}</td>
                   <td data-label="Join Date">{formatDate(employee.joinDate)}</td>
                   <td data-label="Actions" className="actions-cell">
@@ -99,6 +109,9 @@ EmployeeList.propTypes = {
       position: PropTypes.string.isRequired,
       salary: PropTypes.number,
       joinDate: PropTypes.string,
+      phone: PropTypes.string,
+      employmentType: PropTypes.string,
+      status: PropTypes.string,
     })
   ).isRequired,
   loading: PropTypes.bool,
