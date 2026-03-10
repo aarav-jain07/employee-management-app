@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-function EmployeeList({ employees, onAdd, onEdit, onDelete }) {
+function EmployeeList({ employees, loading, onAdd, onEdit, onDelete }) {
   function handleDelete(employee) {
     if (window.confirm(`Are you sure you want to delete ${employee.name}?`)) {
       onDelete(employee.id)
@@ -29,7 +29,9 @@ function EmployeeList({ employees, onAdd, onEdit, onDelete }) {
         </button>
       </div>
 
-      {employees.length === 0 ? (
+      {loading ? (
+        <div className="loading-state" aria-live="polite">Loading employees…</div>
+      ) : employees.length === 0 ? (
         <div className="empty-state">
           <p className="empty-state-text">No employees found.</p>
           <button className="btn btn-primary" onClick={onAdd}>Add your first employee</button>
@@ -99,6 +101,7 @@ EmployeeList.propTypes = {
       joinDate: PropTypes.string,
     })
   ).isRequired,
+  loading: PropTypes.bool,
   onAdd: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,

@@ -1,50 +1,64 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import EmployeeList from './components/EmployeeList'
 import EmployeeForm from './components/EmployeeForm'
+import { fetchEmployees, createEmployee, updateEmployee, deleteEmployee } from './api'
 import './App.css'
 
-const SEED_DATA = [
-  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', department: 'Engineering', position: 'Senior Developer', salary: 95000, joinDate: '2020-03-15' },
-  { id: 2, name: 'Bob Smith', email: 'bob@example.com', department: 'Marketing', position: 'Marketing Manager', salary: 75000, joinDate: '2019-07-01' },
-  { id: 3, name: 'Carol White', email: 'carol@example.com', department: 'HR', position: 'HR Specialist', salary: 65000, joinDate: '2021-01-10' },
-  { id: 4, name: 'David Brown', email: 'david@example.com', department: 'Finance', position: 'Financial Analyst', salary: 80000, joinDate: '2018-11-20' },
-]
-
-function loadEmployees() {
-  try {
-    const stored = localStorage.getItem('employees')
-    if (stored) return JSON.parse(stored)
-  } catch {
-    // ignore parse errors
-  }
-  return SEED_DATA
-}
-
 function App() {
-  const [employees, setEmployees] = useState(loadEmployees)
+  const [employees, setEmployees] = useState([])
   const [view, setView] = useState('list') // 'list' | 'add' | 'edit'
   const [editingEmployee, setEditingEmployee] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const loadEmployees = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await fetchEmployees()
+      setEmployees(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem('employees', JSON.stringify(employees))
-  }, [employees])
+    loadEmployees()
+  }, [loadEmployees])
 
-  function handleAddEmployee(data) {
-    const newEmployee = { ...data, id: Date.now() }
-    setEmployees(prev => [...prev, newEmployee])
-    setView('list')
+  async function handleAddEmployee(data) {
+    setError(null)
+    try {
+      const created = await createEmployee(data)
+      setEmployees(prev => [...prev, created])
+      setView('list')
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
-  function handleUpdateEmployee(data) {
-    setEmployees(prev =>
-      prev.map(emp => (emp.id === editingEmployee.id ? { ...data, id: emp.id } : emp))
-    )
-    setEditingEmployee(null)
-    setView('list')
+  async function handleUpdateEmployee(data) {
+    setError(null)
+    try {
+      const updated = await updateEmployee(editingEmployee.id, data)
+      setEmployees(prev => prev.map(emp => (emp.id === updated.id ? updated : emp)))
+      setEditingEmployee(null)
+      setView('list')
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
-  function handleDeleteEmployee(id) {
-    setEmployees(prev => prev.filter(emp => emp.id !== id))
+  async function handleDeleteEmployee(id) {
+    setError(null)
+    try {
+      await deleteEmployee(id)
+      setEmployees(prev => prev.filter(emp => emp.id !== id))
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   function handleEditEmployee(employee) {
@@ -54,6 +68,7 @@ function App() {
 
   function handleCancel() {
     setEditingEmployee(null)
+    setError(null)
     setView('list')
   }
 
@@ -67,9 +82,17 @@ function App() {
       </header>
 
       <main className="app-main">
+        {error && (
+          <div className="error-banner" role="alert">
+            <strong>Error:</strong> {error}
+            <button className="error-dismiss" onClick={() => setError(null)} aria-label="Dismiss">✕</button>
+          </div>
+        )}
+
         {view === 'list' && (
           <EmployeeList
             employees={employees}
+            loading={loading}
             onAdd={() => setView('add')}
             onEdit={handleEditEmployee}
             onDelete={handleDeleteEmployee}
